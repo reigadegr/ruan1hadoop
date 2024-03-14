@@ -2,8 +2,13 @@ package com.bcu;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
-import org.apache.hadoop.hdfs.DistributedFileSystem;
+import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+
+import org.apache.hadoop.hdfs.*;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
+import org.apache.hadoop.io.IOUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -103,15 +108,36 @@ public class HdfsApi {
         }
         //,迭代输出
     }
+
     @Test
     public void listHdfs2() throws IOException, URISyntaxException {
         //1,构件连接
         FileSystem hdfs = getHdfs();
-        RemoteIterator<LocatedFileStatus> fileStatusIterator=hdfs.listFiles(new Path("/"),true);
-        while(fileStatusIterator.hasNext()){
+        RemoteIterator<LocatedFileStatus> fileStatusIterator = hdfs.listFiles(new Path("/"), true);
+        while (fileStatusIterator.hasNext()) {
             LocatedFileStatus fileStatus = fileStatusIterator.next();
             System.out.println(fileStatus.getPath());
         }
     }
 
+    @Test
+    public void mergeUpload() throws IOException, URISyntaxException {
+        //1,构建连接
+        FileSystem hdfs = getHdfs();
+        //2,构建本地文件系统对象
+        LocalFileSystem local=FileSystem.getLocal(new Configuration());
+
+        //3，通过本地文件系统对象构建输入流
+        FileStatus[] fileStates = local.listStatus(new Path("D:\\output\\merge"));
+        //4，通过hdfs 对象构件输出流
+        FSDataOutputStream outputStream =hdfs.create(new Path("/files/shit2"));
+        //5，打开没一个文件 获取输入流
+        for(FileStatus fileStatus:fileStates){
+            FSDataInputStream open=local.open(fileStatus.getPath());
+            //6,输入流接入输出流
+            IOUtils.copyBytes(open,outputStream,4096);
+            IOUtils.closeStream(outputStream);
+        }
+
+    }
 }
