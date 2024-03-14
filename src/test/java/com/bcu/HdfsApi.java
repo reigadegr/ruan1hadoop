@@ -1,8 +1,7 @@
 package com.bcu;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.*;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.junit.Test;
@@ -17,15 +16,15 @@ import java.net.URISyntaxException;
 public class HdfsApi {
     //    @Test
     public FileSystem getHdfs() throws IOException, URISyntaxException {
-        /**
-         * 构建一个当前程序的配置对象，用于管理所有的配置：*-default。xml
-         * 这个对象会加载所有的*-default。xml中的默认配置
-         * 然后加载所有的*-size。xml中的自定义的配置，用这些自定义的配置替换默认配置
-         * 如何让当前地址知道HDFS的地址？也就是fs.defaultFS
-         * 方法1：创建一个resource资源目录，将core-size.xml复制粘贴到resources中
+        /*
+          构建一个当前程序的配置对象，用于管理所有的配置：*-default。xml
+          这个对象会加载所有的*-default。xml中的默认配置
+          然后加载所有的*-size。xml中的自定义的配置，用这些自定义的配置替换默认配置
+          如何让当前地址知道HDFS的地址？也就是fs.defaultFS
+          方法1：创建一个resource资源目录，将core-size.xml复制粘贴到resources中
          */
         Configuration conf = new Configuration();
-        conf.set("fs.defaultFs", "hdfs://node-1:9001");
+        conf.set("fs.defaultFs", "hdfs://node-1:9000");
         FileSystem hdfs = FileSystem.get(conf);
 
         System.out.println(hdfs);
@@ -82,7 +81,37 @@ public class HdfsApi {
 
         Path hdfsFilePath = new Path("/files/bin.txt");
         Path localFilePath = new Path("file:///D:\\files\\dn.txt");
-        hdfs.copyToLocalFile(hdfsFilePath,localFilePath);
+        hdfs.copyToLocalFile(hdfsFilePath, localFilePath);
         hdfs.close();
     }
+
+    @Test
+    public void listHdfs1() throws IOException, URISyntaxException {
+        //1,构件连接
+        FileSystem hdfs = getHdfs();
+        //2，创建被列举的目录地址对象
+        Path path = new Path("/");
+
+        //3，获取目录下文件状态
+        FileStatus[] fileStatuses = hdfs.listStatus(path);
+        for (FileStatus tmp : fileStatuses) {
+            if (hdfs.isDirectory(tmp.getPath())) {
+                System.out.println(tmp.getPath() + "是目录");
+            } else {
+                System.out.println(tmp.getPath() + "是文件");
+            }
+        }
+        //,迭代输出
+    }
+    @Test
+    public void listHdfs2() throws IOException, URISyntaxException {
+        //1,构件连接
+        FileSystem hdfs = getHdfs();
+        RemoteIterator<LocatedFileStatus> fileStatusIterator=hdfs.listFiles(new Path("/"),true);
+        while(fileStatusIterator.hasNext()){
+            LocatedFileStatus fileStatus = fileStatusIterator.next();
+            System.out.println(fileStatus.getPath());
+        }
+    }
+
 }
