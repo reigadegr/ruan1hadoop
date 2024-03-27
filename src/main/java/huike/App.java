@@ -1,37 +1,41 @@
 package huike;
+
+
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.*;
-import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.hadoop.hdfs.*;
-import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
-import org.apache.hadoop.io.IOUtils;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URISyntaxException;
 
 /**
  * Hello world!
- *
  */
-public class App 
-{
-    public static void main( String[] args ) throws IOException {
-        Configuration configuration = new Configuration();
-        configuration.set("fs.defaultFS", "hdfs://localhost:9000");
-        //2.读取本地文件
-        FileInputStream fileInputStream = new FileInputStream(new File("hdfs://192.168.100.101:9000/opt/aa.txt"));
-        //3.找到文件系统，上传到目的地
-        FileSystem fileSystem = FileSystem.get(configuration);
-        FSDataOutputStream outputStream = fileSystem.create(new Path("/aa.txt"));
+public class App {
+    public static void main(String[] args) throws IOException, URISyntaxException {
+        App app = new App();
+        app.putFileToHdfs();
+    }
+    public FileSystem getHdfs() throws IOException, URISyntaxException {
+        Configuration conf = new Configuration();
+        conf.set("fs.defaultFs", "hdfs://192.168.100.101:9000");
+        FileSystem hdfs = FileSystem.get(conf);
+        System.out.println(hdfs);
+        return hdfs;
+    }
 
-        IOUtils.copyBytes(fileInputStream,outputStream, configuration);
-        //4.释放资源
-        outputStream.close();
-        fileSystem.close();
+    public void putFileToHdfs() throws IOException, URISyntaxException {
+        //1，构建连接
+        FileSystem hdfs = getHdfs();
+
+        System.out.println("hdfs = " + hdfs);
+        //2,构建本地
+        Path localFilePath = new Path("file:///D:\\bin.txt");
+        //3,构建HDFS存储路径
+        Path hdfsFilePath = new Path("/files/aa.txt");
+        //第二个参数表示是否递归
+        hdfs.delete(hdfsFilePath, true);
+        hdfs.copyFromLocalFile(localFilePath, hdfsFilePath);
+        hdfs.close();
     }
 }

@@ -1,0 +1,15 @@
+<configuration>
+    <!--指定保存的数量 默认3 当前伪分布式为1 即可-->
+    <property>
+        <name>dfs.replication</name>
+        <value>1</value>
+    </property>
+
+
+    <!--设置权限 false表示任何人都可以在hdfs操作-->
+    <property>
+        <name>dfs.permissions</name>
+        <value>false</value>
+    </property>
+
+</configuration>

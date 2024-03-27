@@ -2,15 +2,13 @@ package com.bcu;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.*;
-import org.apache.hadoop.fs.FSDataOutputStream;
-import org.apache.hadoop.fs.FileSystem;
-import org.apache.hadoop.fs.Path;
-
-import org.apache.hadoop.hdfs.*;
+import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.io.IOUtils;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
 
@@ -19,14 +17,14 @@ import java.net.URISyntaxException;
  * HDFS API学习
  */
 public class HdfsApi {
-//        @Test
+    //        @Test
     public FileSystem getHdfs() throws IOException, URISyntaxException {
         /*
           构建一个当前程序的配置对象，用于管理所有的配置：*-default。xml
           这个对象会加载所有的*-default。xml中的默认配置
           然后加载所有的*-size。xml中的自定义的配置，用这些自定义的配置替换默认配置
           如何让当前地址知道HDFS的地址？也就是fs.defaultFS
-          方法1：创建一个resource资源目录，将core-size.xml复制粘贴到resources中
+          方法1：创建一个resource资源目录，将core-site.xml复制粘贴到resources中
          */
         Configuration conf = new Configuration();
 //        conf.set("fs.defaultFs", "hdfs://node-1:9000");
@@ -66,16 +64,31 @@ public class HdfsApi {
     @Test
     public void putFileToHdfs() throws IOException, URISyntaxException {
         //1，构建连接
-//        FileSystem hdfs = getHdfs();
-        Configuration conf = new Configuration();
-        conf.set("fs.defaultFs", "hdfs://node-1:9000");
-        FileSystem hdfs = FileSystem.get(conf);
+        FileSystem hdfs = getHdfs();
 
         System.out.println("hdfs = " + hdfs);
         //2,构建本地
         Path localFilePath = new Path("file:///D:\\bin.txt");
         //3,构建HDFS存储路径
+        Path hdfsFilePath = new Path("/files/aa.txt");
+        //第二个参数表示是否递归
+        hdfs.delete(hdfsFilePath, true);
+        hdfs.copyFromLocalFile(localFilePath, hdfsFilePath);
+        hdfs.close();
+    }
+
+    @Test
+    public void putVmFileToHdfs() throws IOException, URISyntaxException {
+        //1，构建连接
+        FileSystem hdfs = getHdfs();
+
+        System.out.println("hdfs = " + hdfs);
+        //2,构建本地
+        Path localFilePath = new Path("file:////home/reigadegr/aa.txt");
+        //3,构建HDFS存储路径
         Path hdfsFilePath = new Path("/files");
+        //第二个参数表示是否递归
+        hdfs.delete(hdfsFilePath, true);
         hdfs.copyFromLocalFile(localFilePath, hdfsFilePath);
         hdfs.close();
     }
@@ -127,17 +140,17 @@ public class HdfsApi {
         //1,构建连接
         FileSystem hdfs = getHdfs();
         //2,构建本地文件系统对象
-        LocalFileSystem local=FileSystem.getLocal(new Configuration());
+        LocalFileSystem local = FileSystem.getLocal(new Configuration());
 
         //3，通过本地文件系统对象构建输入流
         FileStatus[] fileStates = local.listStatus(new Path("D:\\output\\merge"));
         //4，通过hdfs 对象构件输出流
-        FSDataOutputStream outputStream =hdfs.create(new Path("/files/shit2"));
+        FSDataOutputStream outputStream = hdfs.create(new Path("/files/shit2"));
         //5，打开没一个文件 获取输入流
-        for(FileStatus fileStatus:fileStates){
-            FSDataInputStream open=local.open(fileStatus.getPath());
+        for (FileStatus fileStatus : fileStates) {
+            FSDataInputStream open = local.open(fileStatus.getPath());
             //6,输入流接入输出流
-            IOUtils.copyBytes(open,outputStream,4096);
+            IOUtils.copyBytes(open, outputStream, 4096);
             IOUtils.closeStream(outputStream);
         }
 

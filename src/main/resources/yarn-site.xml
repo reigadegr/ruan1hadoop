@@ -1,0 +1,15 @@
+<configuration>
+
+    <!-- Site specific YARN configuration properties -->
+    <!--指定Yarn的Boss，ResourceManager地址-->
+    <property>
+        <name>yarn.resourcemanager.hostname</name>
+        <value>node-1</value>
+    </property>
+
+    <!--NodeManager获取数据的方式-->
+    <property>
+        <name>yarn.nodemanager.aux-services</name>
+        <value>mapreduce_shuffle</value>
+    </property>
+</configuration>
