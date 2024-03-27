@@ -1,0 +1,13 @@
+<configuration>
+
+    <property>
+        <name>fs.default.name</name>
+        <value>hdfs://node-1:9000</value>
+    </property>
+
+    <property>
+        <name>hadoop.tmp.dir</name>
+        <value>/opt/software_package/hadoop-2.7.1/tmp</value>
+    </property>
+
+</configuration>

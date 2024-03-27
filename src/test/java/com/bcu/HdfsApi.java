@@ -19,7 +19,7 @@ import java.net.URISyntaxException;
  * HDFS API学习
  */
 public class HdfsApi {
-    //    @Test
+//        @Test
     public FileSystem getHdfs() throws IOException, URISyntaxException {
         /*
           构建一个当前程序的配置对象，用于管理所有的配置：*-default。xml
@@ -29,7 +29,9 @@ public class HdfsApi {
           方法1：创建一个resource资源目录，将core-size.xml复制粘贴到resources中
          */
         Configuration conf = new Configuration();
-        conf.set("fs.defaultFs", "hdfs://node-1:9000");
+//        conf.set("fs.defaultFs", "hdfs://node-1:9000");
+        conf.set("fs.defaultFs", "hdfs://192.168.100.101:9000");
+
         FileSystem hdfs = FileSystem.get(conf);
 
         System.out.println(hdfs);
@@ -53,7 +55,7 @@ public class HdfsApi {
         //1,获取hdfs连接对象
         FileSystem hdfs = getHdfs();
         //2,构建牡蛎的创建路径对象
-        Path path = new Path("/windows");
+        Path path = new Path("/test");
         if (hdfs.exists(path)) {
             //第二个参数表示是否递归
             hdfs.delete(path, true);
